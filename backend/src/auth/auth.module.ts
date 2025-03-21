@@ -4,12 +4,13 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { jwtConfig } from 'src/config/jwt.config';
 import { JwtStrategy } from './jwt.strategy';
+import { UserEntity } from 'src/user/entities/user.entity';
 
 @Module({
     imports: [
         PassportModule.register({defaultStrategy: 'jwt'}),
         JwtModule.register(jwtConfig),
-        TypeOrmModule.forFeature([]) // TODO: Add the user entity after create it.
+        TypeOrmModule.forFeature([UserEntity])
     ],
     providers: [JwtStrategy],
     exports: [JwtModule]
