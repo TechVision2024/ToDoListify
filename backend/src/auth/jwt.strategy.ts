@@ -1,13 +1,17 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { JwtPayloadInterface } from "./interfaces";
+import { InjectRepository } from "@nestjs/typeorm";
+import { UserEntity } from "src/user/entities/user.entity";
+import { Repository } from "typeorm";
+import { UserState } from "src/user/enums/user-state.enum";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor( 
-        // TODO: Add User Repository after create the user entity.
+        @InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
         @Inject(ConfigService) configService: ConfigService
     ) {
         super({
@@ -23,12 +27,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
      * @throws UnauthorizedException if user is not found in the database.
      * @returns Promise of UserEntity
      */
-    async validate( payload: JwtPayloadInterface ) {
-        // TODO: Add the logic after create the user entity.
-        /*
-            Finding the user in the database, if user not found 
-            this means that the user is not registered, and the 
-            JWT is invalid.
-        */
+    async validate( payload: JwtPayloadInterface ): Promise<UserEntity> {
+        const { username } = payload;
+        const user = await this.userRepository.findOne({where: {username}});
+        if ( !user || user['state'] == UserState.INACTIVE)
+            throw new UnauthorizedException("User NOT found!");
+        return user;
     }
 }
