@@ -28,7 +28,7 @@ export class UserEntity extends BaseEntity {
     @Column({ type: 'text' })
     salt: string;
 
-    @Column({enum: UserState , default: UserState.INACTIVE})
+    @Column({enum: UserState , default: UserState.ACTIVE})
     state: UserState;
 
     @Column({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
